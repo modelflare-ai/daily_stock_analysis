@@ -25,6 +25,7 @@ import {
   SettingsPanelErrorBoundary,
   SettingsSectionCard,
 } from '../components/settings';
+import { ModelflareOnboarding } from '../components/settings/ModelflareOnboarding';
 import { WEB_BUILD_INFO } from '../utils/constants';
 import { parseStockListValue } from '../utils/stockList';
 import { getCategoryDescription, getCategoryTitle } from '../utils/systemConfigI18n';
@@ -78,6 +79,8 @@ const GENERATION_BACKEND_STATUS_KEYS = new Set([
   'DEEPSEEK_API_KEY',
   'DEEPSEEK_API_KEYS',
   'AIHUBMIX_KEY',
+  'MODELFLARE_API_KEY',
+  'MODELFLARE_BASE_URL',
   'MODELFLARE_KEY',
   'ANSPIRE_LLM_ENABLED',
   'ANSPIRE_LLM_BASE_URL',
@@ -856,6 +859,7 @@ const SettingsPage: React.FC = () => {
   const shouldShowFirstRunSetup = activeCategory === 'base';
   const shouldShowScreeningSettings = activeCategory === 'base' && Boolean(screeningItem);
   const hasConfiguredChannels = Boolean((rawActiveItemMap.get('LLM_CHANNELS') || '').trim()
+    || (rawActiveItemMap.get('MODELFLARE_API_KEY') || '').trim()
     || (rawActiveItemMap.get('MODELFLARE_KEY') || '').trim());
   const hasLitellmConfig = Boolean((rawActiveItemMap.get('LITELLM_CONFIG') || '').trim());
   const hasRuntimeSchedulerMismatch =
@@ -1368,6 +1372,7 @@ const SettingsPage: React.FC = () => {
                 t={t}
               />
             ) : null}
+            <ModelflareOnboarding onSaved={() => { void load(); }} />
             {shouldShowScreeningSettings ? (
               <SettingsSectionCard
                 title={t('settings.screening')}

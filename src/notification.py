@@ -1090,9 +1090,11 @@ class NotificationService(
 
                 # 错误信息（如果有）
                 if not result.success and result.error_message:
+                    detail = result.error_message
+                    limit = 240 if "modelflare.dev" in detail else 100
                     report_lines.extend([
                         "",
-                        f"❌ **分析异常**：{result.error_message[:100]}",
+                        f"❌ **分析异常**：{detail[:limit]}",
                     ])
 
                 report_lines.extend([

@@ -71,7 +71,7 @@ export const LLM_PROVIDER_TEMPLATES: LLMProviderTemplate[] = [
     label: 'Modelflare（聚合平台）',
     protocol: 'openai',
     baseUrl: 'https://modelflare.dev/v1',
-    placeholderModels: MODELFLARE_DEFAULT_MODEL,
+    placeholderModels: 'gpt-6.1-sol,gpt-6-sol,gpt-6-astra,claude-sonnet-5,claude-opus-5-5,gemini-3.1-pro-preview,grok-4.7',
     capabilities: ['openai-compatible', 'aggregator', 'model-discovery'],
     configHint:
       'API Key 的路由分组需支持所选模型；模型 ID 请以控制台或获取模型的结果为准。modelflare 渠道的 Base URL 留空时使用默认 /v1 地址，可按需覆盖，不额外拼接 /chat/completions。',

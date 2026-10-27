@@ -289,6 +289,11 @@ async def app_lifespan(app: FastAPI):
     app.state.system_config_service = SystemConfigService(
         runtime_scheduler=app.state.runtime_scheduler_service,
     )
+    # Keep startup responsive: the first-run Modelflare smoke is a tiny
+    # best-effort request and reports its result in the normal server log.
+    from src.services.modelflare_smoke import run_startup_smoke
+
+    app.state.modelflare_smoke_task = asyncio.create_task(asyncio.to_thread(run_startup_smoke))
     _schedule_stock_index_background_refresh(app, "startup")
     # 名称解析器的 AkShare 缓存预热：命中磁盘缓存则零网络加载，否则发起
     # 后台单飞拉取。把冷启动等待从首个用户请求挪到进程启动窗口。
@@ -305,6 +310,13 @@ async def app_lifespan(app: FastAPI):
                 await refresh_task
         if hasattr(app.state, "system_config_service"):
             delattr(app.state, "system_config_service")
+        smoke_task = getattr(app.state, "modelflare_smoke_task", None)
+        if smoke_task is not None and not smoke_task.done():
+            smoke_task.cancel()
+            with suppress(asyncio.CancelledError):
+                await smoke_task
+        if hasattr(app.state, "modelflare_smoke_task"):
+            delattr(app.state, "modelflare_smoke_task")
         runtime_scheduler = getattr(app.state, "runtime_scheduler_service", None)
         if runtime_scheduler is not None:
             runtime_scheduler.stop()

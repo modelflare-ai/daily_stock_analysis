@@ -1,3 +1,31 @@
+<!-- MF-START -->
+<p align="center"><a href="http://modelflare.dev/sign-up?utm_source=github&utm_campaign=mf_daily_stock_analysis"><img src="https://github.com/tbphp/gpt-load/raw/main/screenshot/modelflare-banner-en.png" alt="Modelflare"></a></p>
+
+# daily_stock_analysis · Modelflare Edition
+
+> This is the Modelflare Edition of daily_stock_analysis: models are pre-configured, just add one Modelflare API key. [Get your key](http://modelflare.dev/sign-up?utm_source=github&utm_campaign=mf_daily_stock_analysis)
+
+Modelflare is operated by Havenbyte LLC (USA). It supports mainstream models such as GPT, Claude, Gemini, and Grok, along with common compatible protocols, plus 40+ image and video models. API keys support ordered fallback: one API key can call multiple models, keys can be assigned backup groups, and request logs show status, latency, tokens, and actual cost.
+
+Cache compensation is another highlight: selected OpenAI Price-First, Stable, and Premium groups guarantee daily cache hit rates of 65%, 75%, and 85% respectively. For eligible API requests that fall short of the guaranteed hit rate, the platform provides corresponding compensation.
+
+There is also a first top-up promotion: a single top-up of US$20 unlocks the 0.015x GPT promo group, where GPT-5.6-Sol costs about ¥0.51 (input) / ¥3.01 (output) per million tokens, with no usage cap. A single top-up of US$50 unlocks the 0.03x Claude promo group.
+
+## Quick Start
+1. [Sign up and get an API key](http://modelflare.dev/sign-up?utm_source=github&utm_campaign=mf_daily_stock_analysis)
+2. One-click deploy: `MODELFLARE_API_KEY=sk-xxx docker compose -f docker/docker-compose.yml up -d server`
+3. Paste the key and run your first analysis. The default model is `gpt-6.1-sol`. Web/API startup sends one minimal test call.
+
+Based on [daily_stock_analysis](https://github.com/ZhuLinsen/daily_stock_analysis). Thanks to the original authors.
+
+![Connectivity check](mf-edition/connected.png)
+
+![AAPL decision dashboard](mf-edition/aapl.png)
+
+<!-- MF-SCREENSHOT -->
+
+<!-- MF-END -->
+
 <div align="center">
 
 # AI Stock Analysis System

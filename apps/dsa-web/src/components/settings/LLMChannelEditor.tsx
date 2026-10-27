@@ -3,6 +3,7 @@ import type React from 'react';
 import type { ParsedApiError } from '../../api/error';
 import { getParsedApiError } from '../../api/error';
 import { systemConfigApi } from '../../api/systemConfig';
+import { useUiLanguage } from '../../contexts/UiLanguageContext';
 import type { LLMApiSurface, LLMCapabilityCheck, LLMCapabilityCheckResult } from '../../types/systemConfig';
 import { ApiErrorAlert, Badge, Button, InlineAlert, Input, Select, StatusDot, Tooltip } from '../common';
 import type { ChannelProtocol } from './llmProviderTemplates';
@@ -17,6 +18,7 @@ import {
   isKnownProviderTemplate,
 } from './llmProviderTemplates';
 import { SettingsHelpButton } from './SettingsHelpButton';
+import { modelflareConnectionMessage } from './modelflareErrors';
 
 const PROTOCOL_OPTIONS: Array<{ value: ChannelProtocol; label: string }> = [
   { value: 'openai', label: 'OpenAI Compatible' },
@@ -269,8 +271,13 @@ function resolveInitialChannelApiKeySource(
   if (apiKeysValue) {
     return initialItemSourceByKey.get(apiKeysKey);
   }
-  if (upperName === 'MODELFLARE' && initialItemValueByKey.get('MODELFLARE_KEY')) {
-    return initialItemSourceByKey.get('MODELFLARE_KEY');
+  if (upperName === 'MODELFLARE') {
+    if (initialItemValueByKey.get('MODELFLARE_API_KEY')) {
+      return initialItemSourceByKey.get('MODELFLARE_API_KEY');
+    }
+    if (initialItemValueByKey.get('MODELFLARE_KEY')) {
+      return initialItemSourceByKey.get('MODELFLARE_KEY');
+    }
   }
   return initialItemSourceByKey.get(apiKeysKey) ?? initialItemSourceByKey.get(apiKeyKey);
 }
@@ -303,7 +310,7 @@ function resolveInitialChannelApiKeyValue(
     return apiKeyValue;
   }
   if (upperName === 'MODELFLARE') {
-    return itemValueByKey.get('MODELFLARE_KEY') || '';
+    return itemValueByKey.get('MODELFLARE_API_KEY') || itemValueByKey.get('MODELFLARE_KEY') || '';
   }
   return itemValueByKey.get(apiKeysKey) || itemValueByKey.get(apiKeyKey) || '';
 }
@@ -1222,6 +1229,37 @@ function getLlmErrorCodeLabel(code?: string | null): string {
   return LLM_ERROR_LABELS[code || ''] || '测试失败';
 }
 
+function modelflareChannelBaseUrl(baseUrl: string, channelName: string): string {
+  const explicit = baseUrl.trim();
+  if (explicit) return explicit;
+  return channelName.trim().toLowerCase() === 'modelflare' ? 'https://modelflare.dev/v1' : '';
+}
+
+function modelflareTestMessage(
+  baseUrl: string,
+  channelName: string,
+  result: {
+    message?: string | null;
+    error?: string | null;
+    details?: Record<string, unknown>;
+    resolvedModel?: string | null;
+  },
+  language: string,
+): string | undefined {
+  const reason = typeof result.details?.reason === 'string' ? result.details.reason : '';
+  const httpStatus = typeof result.details?.http_status === 'number' ? result.details.http_status : null;
+  const detailsModel = typeof result.details?.model === 'string' ? result.details.model : '';
+  return modelflareConnectionMessage({
+    baseUrl: modelflareChannelBaseUrl(baseUrl, channelName),
+    reason,
+    error: result.error,
+    message: result.message,
+    model: result.resolvedModel || detailsModel,
+    httpStatus,
+    language,
+  });
+}
+
 function getLlmTroubleshootingHint(
   code?: string | null,
   stage?: string | null,
@@ -1472,7 +1510,8 @@ function parseChannelsFromItems(
   itemSourceByKey: Map<string, boolean> = new Map(),
 ): ChannelConfig[] {
   const itemMap = new Map(items.map((item) => [item.key.toUpperCase(), item.value]));
-  const implicitModelflare = splitModels(itemMap.get('MODELFLARE_KEY') || '').length > 0
+  const implicitModelflare = splitModels(itemMap.get('MODELFLARE_API_KEY') || '').length > 0
+    || splitModels(itemMap.get('MODELFLARE_KEY') || '').length > 0
     || splitModels(itemMap.get('LLM_MODELFLARE_API_KEY') || '').length > 0
     || splitModels(itemMap.get('LLM_MODELFLARE_API_KEYS') || '').length > 0;
   const channelNames = ((itemMap.get('LLM_CHANNELS') || '').trim()
@@ -1590,7 +1629,8 @@ function buildFilteredChannelUpdateItems({
     ...buildChangedItemKeys(channels, initialChannels, initialItemSourceByKey, savedItemMap),
     ...runtimeConfigChangedKeys(runtimeConfig, initialRuntimeConfig),
   ]);
-  const usesSimpleModelflare = Boolean(savedItemMap.get('MODELFLARE_KEY'))
+  const simpleModelflareKey = savedItemMap.get('MODELFLARE_API_KEY') || savedItemMap.get('MODELFLARE_KEY');
+  const usesSimpleModelflare = Boolean(simpleModelflareKey)
     && !(savedItemMap.get('LLM_CHANNELS') || '').trim()
     && !(savedItemMap.get('LLM_MODELFLARE_API_KEY') || '').trim()
     && !(savedItemMap.get('LLM_MODELFLARE_API_KEYS') || '').trim();
@@ -1607,12 +1647,16 @@ function buildFilteredChannelUpdateItems({
     return true;
   });
   if (usesSimpleModelflare) {
+    const kept = updates.filter((item) => !['LLM_MODELFLARE_API_KEY', 'LLM_MODELFLARE_API_KEYS', 'MODELFLARE_KEY'].includes(item.key));
     const current = channels.find((channel) => channel.name.toLowerCase() === 'modelflare');
     const previous = initialChannels.find((channel) => channel.name.toLowerCase() === 'modelflare');
-    if (current?.apiKey !== previous?.apiKey) {
-      updates.push({ key: 'MODELFLARE_KEY', value: current?.apiKey || '' });
+    if ((current?.apiKey || '') !== (previous?.apiKey || '')) {
+      kept.push({ key: 'MODELFLARE_API_KEY', value: current?.apiKey || '' });
+      if ((savedItemMap.get('MODELFLARE_KEY') || '').trim()) {
+        kept.push({ key: 'MODELFLARE_KEY', value: '' });
+      }
     }
-    return updates.filter((item) => item.key !== 'LLM_MODELFLARE_API_KEY' && item.key !== 'LLM_MODELFLARE_API_KEYS');
+    return kept;
   }
   return updates;
 }
@@ -1677,6 +1721,7 @@ export const LLMChannelEditor: React.FC<LLMChannelEditorProps> = ({
   draftResetToken = 0,
   disabled = false,
 }) => {
+  const { language } = useUiLanguage();
   const initialItemSourceByKey = useMemo(() => {
     const sourceByKey = new Map<string, boolean>();
     for (const item of items) {
@@ -2155,10 +2200,11 @@ export const LLMChannelEditor: React.FC<LLMChannelEditorProps> = ({
         useSavedSecret: shouldUseSavedHermesSecret(channel, maskToken, hasPersistedHermesSecret(channel)),
       });
 
+      const friendly = result.success ? undefined : modelflareTestMessage(channel.baseUrl, channel.name, result, language);
       const text = result.success
         ? `连接成功${result.resolvedModel ? ` · ${result.resolvedModel}` : ''}${result.latencyMs ? ` · ${result.latencyMs} ms` : ''}`
-        : buildLlmFailureText(result);
-      const hint = result.success ? undefined : buildLlmTestHint(result);
+        : (friendly || buildLlmFailureText(result));
+      const hint = result.success || friendly ? undefined : buildLlmTestHint(result);
 
       setTestStates((previous) => ({
         ...previous,
@@ -2224,8 +2270,10 @@ export const LLMChannelEditor: React.FC<LLMChannelEditorProps> = ({
           status: result.success ? 'success' : 'error',
           text: result.success
             ? `已获取 ${result.models.length} 个模型${result.latencyMs ? ` · ${result.latencyMs} ms` : ''}`
-            : buildLlmFailureText(result),
-          hint: result.success ? undefined : getLlmTroubleshootingHint(result.errorCode, result.stage, 'discovery', result.details),
+            : (modelflareTestMessage(channel.baseUrl, channel.name, result, language) || buildLlmFailureText(result)),
+          hint: result.success || modelflareTestMessage(channel.baseUrl, channel.name, result, language)
+            ? undefined
+            : getLlmTroubleshootingHint(result.errorCode, result.stage, 'discovery', result.details),
           models: result.success ? result.models : (previous[channel.id]?.models || []),
         },
       }));
@@ -2319,6 +2367,7 @@ export const LLMChannelEditor: React.FC<LLMChannelEditorProps> = ({
       const capabilityResults = result.capabilityResults || {};
       const hasFailure = Object.values(capabilityResults).some((item) => item?.status === 'failed');
       const hasSkipped = Object.values(capabilityResults).some((item) => item?.status === 'skipped');
+      const friendly = result.success ? undefined : modelflareTestMessage(channel.baseUrl, channel.name, result, language);
       setCapabilityStates((previous) => ({
         ...previous,
         [channel.id]: {
@@ -2328,8 +2377,8 @@ export const LLMChannelEditor: React.FC<LLMChannelEditorProps> = ({
             ? summarizeCapabilityResults(capabilityResults)
             : result.success
               ? '未返回能力检测结果'
-              : buildLlmFailureText(result),
-          hint: getFirstCapabilityHint(capabilityResults)
+              : (friendly || buildLlmFailureText(result)),
+          hint: friendly || getFirstCapabilityHint(capabilityResults)
             || (!result.success ? buildLlmTestHint(result) : undefined),
           results: capabilityResults,
         },

@@ -167,6 +167,8 @@ class SystemConfigService:
         "DEEPSEEK_API_KEY",
         "DEEPSEEK_API_KEYS",
         "AIHUBMIX_KEY",
+        "MODELFLARE_API_KEY",
+        "MODELFLARE_BASE_URL",
         "MODELFLARE_KEY",
         "ANSPIRE_LLM_ENABLED",
         "ANSPIRE_LLM_BASE_URL",

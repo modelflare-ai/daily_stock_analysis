@@ -52,6 +52,7 @@ from src.llm.hermes import (
 )
 from src.llm.generation_params import apply_litellm_generation_params
 from src.llm.errors import call_litellm_with_param_recovery
+from src.llm.modelflare_errors import rewrite_modelflare_error
 from src.llm.backend_registry import (
     LOCAL_CLI_GENERATION_BACKEND_IDS,
     LITELLM_BACKEND_ID,
@@ -3072,6 +3073,14 @@ Output strictly in the following JSON format. This is a complete Decision Dashbo
         runtime_config = config or self._get_runtime_config()
         redactions = self._litellm_redaction_values_for_model(runtime_config, model)
         sanitized = sanitize_hermes_error_text(exc, redaction_values=redactions)
+        rewritten = rewrite_modelflare_error(
+            sanitized,
+            model=model,
+            model_list=getattr(runtime_config, "llm_model_list", None),
+            language=getattr(runtime_config, "report_language", "zh") or "zh",
+        )
+        if rewritten != sanitized:
+            return rewritten
         return redact_diagnostic_text(sanitized, limit=500)
 
     def _dispatch_litellm_completion(
@@ -4284,6 +4293,13 @@ Output strictly in the following JSON format. This is a complete Decision Dashbo
             
         except Exception as e:
             safe_error = self._sanitize_hermes_exception_text(e)
+            safe_error = rewrite_modelflare_error(
+                safe_error,
+                model=str(getattr(config, "litellm_model", "") or ""),
+                model_list=getattr(config, "llm_model_list", None),
+                language=report_language,
+            )
+            visible_error = safe_error if "modelflare.dev" in safe_error else safe_error[:100]
             logger.error("AI 分析 %s(%s) 失败: %s", name, code, safe_error)
             return AnalysisResult(
                 code=code,
@@ -4294,9 +4310,9 @@ Output strictly in the following JSON format. This is a complete Decision Dashbo
                 confidence_level=localize_confidence_level('低', report_language),
                 analysis_summary=_localized_text(
                     report_language,
-                    en=f'Analysis failed: {safe_error[:100]}',
-                    zh=f'分析过程出错: {safe_error[:100]}',
-                    ko=f'분석 중 오류가 발생했습니다: {safe_error[:100]}',
+                    en=f'Analysis failed: {visible_error}',
+                    zh=f'分析过程出错: {visible_error}',
+                    ko=f'분석 중 오류가 발생했습니다: {visible_error}',
                 ),
                 risk_warning=_localized_text(
                     report_language,

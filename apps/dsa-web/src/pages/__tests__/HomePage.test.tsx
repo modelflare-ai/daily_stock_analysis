@@ -2670,7 +2670,7 @@ describe('HomePage', () => {
     const regionSelector = await screen.findByRole('button', { name: '选择大盘复盘市场' });
     expect(regionSelector).toHaveTextContent('服务器默认');
     expect(regionSelector).not.toHaveTextContent('A 股');
-    expect(systemConfigApi.getConfig).not.toHaveBeenCalled();
+    expect(systemConfigApi.getConfig).toHaveBeenCalledTimes(1);
 
     fireEvent.click(await screen.findByRole('button', { name: '大盘复盘' }));
 
@@ -2723,7 +2723,7 @@ describe('HomePage', () => {
         regions: ['cn', 'us'],
       });
     });
-    expect(systemConfigApi.getConfig).not.toHaveBeenCalled();
+    expect(systemConfigApi.getConfig).toHaveBeenCalledTimes(1);
   });
 
   it('keeps report language unset when only the UI language is English', async () => {

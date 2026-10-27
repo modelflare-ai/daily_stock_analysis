@@ -9,6 +9,7 @@ import { agentApi, type SkillInfo } from '../api/agent';
 import { systemConfigApi } from '../api/systemConfig';
 import { ApiErrorAlert, Button, Drawer, EmptyState, InlineAlert } from '../components/common';
 import { DashboardStateBlock } from '../components/dashboard';
+import { ModelflareOnboarding } from '../components/settings/ModelflareOnboarding';
 import { StockAutocomplete } from '../components/StockAutocomplete';
 import { StockHistoryTrendDrawer } from '../components/history';
 import { ReportMarkdownDrawer } from '../components/report/ReportMarkdownDrawer';
@@ -1677,6 +1678,8 @@ const HomePage: React.FC = () => {
             ) : null}
           </div>
         ) : null}
+
+        <ModelflareOnboarding className="mx-3 mb-2 md:mx-4" />
 
         {setupNeedsAction ? (
           <div className="px-3 pb-2 md:px-4">

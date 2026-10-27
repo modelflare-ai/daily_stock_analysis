@@ -615,7 +615,9 @@ describe('LLMChannelEditor', () => {
     await screen.findByRole('button', { name: /Modelflare（聚合平台）/i });
     expect(screen.getByLabelText('渠道名称')).toHaveValue('modelflare');
     expect(screen.getByLabelText('Base URL')).toHaveValue('https://modelflare.dev/v1');
-    expect(screen.getByLabelText('模型（逗号分隔）')).toHaveValue('gpt-6.1-sol');
+    expect(screen.getByLabelText('模型（逗号分隔）')).toHaveValue(
+      'gpt-6.1-sol,gpt-6-sol,gpt-6-astra,claude-sonnet-5,claude-opus-5-5,gemini-3.1-pro-preview,grok-4.7',
+    );
     expect(screen.getByLabelText('API Key')).toHaveValue('');
     expect(screen.getByRole('link', { name: 'Modelflare 专属注册' })).toHaveAttribute(
       'href', 'https://modelflare.dev/sign-up?utm_source=daily_stock_analysis&utm_campaign=app',
@@ -655,7 +657,10 @@ describe('LLMChannelEditor', () => {
     fireEvent.change(screen.getByLabelText('API Key'), { target: { value: 'sk-new' } });
     fireEvent.click(screen.getByRole('button', { name: '保存 AI 配置' }));
     await waitFor(() => expect(update).toHaveBeenCalled());
-    expect(update.mock.calls[0][0].items).toEqual([{ key: 'MODELFLARE_KEY', value: 'sk-new' }]);
+    expect(update.mock.calls[0][0].items).toEqual([
+      { key: 'MODELFLARE_API_KEY', value: 'sk-new' },
+      { key: 'MODELFLARE_KEY', value: '' },
+    ]);
   });
 
   it('does not append Modelflare to explicitly declared channels when its shorthand key exists', () => {

@@ -81,10 +81,19 @@ def test_daily_analysis_maps_all_provider_template_channels() -> None:
 
 
 def test_daily_analysis_accepts_modelflare_one_key_from_secrets() -> None:
-    assert _load_daily_analysis_env()["MODELFLARE_KEY"] == "${{ secrets.MODELFLARE_KEY }}"
+    env = _load_daily_analysis_env()
+    assert env["MODELFLARE_KEY"] == "${{ secrets.MODELFLARE_KEY }}"
+    assert env["MODELFLARE_API_KEY"] == "${{ secrets.MODELFLARE_API_KEY }}"
     workflow = yaml.safe_load(WORKFLOW_PATH.read_text(encoding="utf-8"))
-    analyze = next(step for step in workflow["jobs"]["analyze"]["steps"] if step.get("name") == "执行股票分析")
+    steps = workflow["jobs"]["analyze"]["steps"]
+    analyze = next(step for step in steps if step.get("name") == "执行股票分析")
     assert '[ -n "$MODELFLARE_KEY" ]' in analyze["run"]
+    assert '[ -n "$MODELFLARE_API_KEY" ]' in analyze["run"]
+    smoke = next(step for step in steps if step.get("name") == "检查 Modelflare 连通性")
+    assert smoke["env"]["MODELFLARE_KEY"] == "${{ secrets.MODELFLARE_KEY }}"
+    assert smoke["env"]["MODELFLARE_API_KEY"] == "${{ secrets.MODELFLARE_API_KEY }}"
+    assert "modelflare_smoke" in smoke["run"]
+    assert "MODELFLARE_API_KEY" in smoke["run"]
 
 
 def test_daily_analysis_keeps_channel_secrets_in_secrets_context() -> None:

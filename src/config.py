@@ -513,7 +513,10 @@ def resolve_llm_channel_base_url(channel_name: str, base_url: Optional[str]) -> 
     if explicit:
         return explicit
     if channel_name.strip().lower() == "modelflare":
-        return MODELFLARE_LLM_BASE_URL_DEFAULT
+        # MODELFLARE_BASE_URL is the one-key deployment override. Keep the
+        # named-channel default as a fallback so existing LLM_* channel files
+        # remain compatible.
+        return (os.getenv("MODELFLARE_BASE_URL") or MODELFLARE_LLM_BASE_URL_DEFAULT).strip()
     return ""
 
 
@@ -524,7 +527,7 @@ def resolve_llm_channel_names(config_map: Mapping[str, str]) -> str:
         return channels
     if any(
         key.strip()
-        for field in ("MODELFLARE_KEY", "LLM_MODELFLARE_API_KEY", "LLM_MODELFLARE_API_KEYS")
+        for field in ("MODELFLARE_API_KEY", "MODELFLARE_KEY", "LLM_MODELFLARE_API_KEY", "LLM_MODELFLARE_API_KEYS")
         for key in (config_map.get(field) or "").split(',')
     ):
         return "modelflare"
@@ -534,10 +537,11 @@ def resolve_llm_channel_names(config_map: Mapping[str, str]) -> str:
 def resolve_llm_channel_api_keys(
     channel_name: str, api_keys: List[str], config_map: Mapping[str, str],
 ) -> List[str]:
-    """Keep explicit channel keys first, with MODELFLARE_KEY as its shorthand."""
+    """Keep explicit channel keys first, with MODELFLARE_API_KEY as shorthand."""
     if api_keys or channel_name.strip().lower() != "modelflare":
         return api_keys
-    return [key.strip() for key in (config_map.get("MODELFLARE_KEY") or "").split(',') if key.strip()]
+    raw = config_map.get("MODELFLARE_API_KEY") or config_map.get("MODELFLARE_KEY") or ""
+    return [key.strip() for key in raw.split(',') if key.strip()]
 
 
 def resolve_llm_channel_models(

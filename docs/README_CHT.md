@@ -1,3 +1,39 @@
+<!-- MF-START -->
+<p align="center"><a href="http://modelflare.dev/sign-up?utm_source=github&utm_campaign=mf_daily_stock_analysis"><img src="https://github.com/tbphp/gpt-load/raw/main/screenshot/modelflare-banner-en.png" alt="Modelflare"></a></p>
+
+# daily_stock_analysis · Modelflare Edition
+
+> This is the Modelflare Edition of daily_stock_analysis: models are pre-configured, just add one Modelflare API key. [Get your key](http://modelflare.dev/sign-up?utm_source=github&utm_campaign=mf_daily_stock_analysis)
+
+Modelflare is operated by Havenbyte LLC (USA). It supports mainstream models such as GPT, Claude, Gemini, and Grok, along with common compatible protocols, plus 40+ image and video models. API keys support ordered fallback: one API key can call multiple models, keys can be assigned backup groups, and request logs show status, latency, tokens, and actual cost.
+
+Cache compensation is another highlight: selected OpenAI Price-First, Stable, and Premium groups guarantee daily cache hit rates of 65%, 75%, and 85% respectively. For eligible API requests that fall short of the guaranteed hit rate, the platform provides corresponding compensation.
+
+There is also a first top-up promotion: a single top-up of US$20 unlocks the 0.015x GPT promo group, where GPT-5.6-Sol costs about ¥0.51 (input) / ¥3.01 (output) per million tokens, with no usage cap. A single top-up of US$50 unlocks the 0.03x Claude promo group.
+
+---
+
+Modelflare 站點是由美國 Havenbyte LLC 營運，支援 GPT、Claude、Gemini、Grok 等主流模型和常用相容協議，同時也支援 40 多種圖片及影片模型。API Key 可以設定有序回退，一把 API Key 可以呼叫多個模型，Key 還可以設定備用分組，並且從請求日誌裡能看到狀態、延遲、Token 和實際費用。
+
+快取補償是這個站的另一個亮點：部分 OpenAI 價格優先、穩定和高級分組分別提供每日 65%、75%、85% 的快取命中率保障，對於符合條件的 API 請求如果未達到快取命中率，平台會給予對應補充。
+
+站點目前也有首次儲值解鎖特惠分組的活動，單筆儲值 US$20 後可解鎖 0.015 倍率 GPT 特惠分組，解鎖後 GPT-5.6-Sol 的價格大約是 ¥0.51（輸入）/ ¥3.01（輸出）/每百萬 Token，並且沒有使用上限限制。單筆儲值 US$50 後可解鎖 0.03 倍率 Claude 特惠分組。
+
+## Quick Start / 快速開始
+1. [Sign up and get an API key / 註冊並取得 API Key](http://modelflare.dev/sign-up?utm_source=github&utm_campaign=mf_daily_stock_analysis)
+2. One-click deploy / 一鍵部署：`MODELFLARE_API_KEY=sk-xxx docker compose -f docker/docker-compose.yml up -d server`
+3. Paste the key and run your first analysis / 填入 Key，跑第一次分析；預設模型為 `gpt-6.1-sol`，Web/API 啟動時會自動發起一次最小測試呼叫。
+
+Based on [daily_stock_analysis](https://github.com/ZhuLinsen/daily_stock_analysis). Thanks to the original authors. / 基於 daily_stock_analysis，感謝原作者。
+
+![連通測試](mf-edition/connected.png)
+
+![AAPL 決策儀表盤](mf-edition/aapl.png)
+
+<!-- MF-SCREENSHOT -->
+
+<!-- MF-END -->
+
 <div align="center">
 
 # 股票智能分析系統

@@ -50,7 +50,7 @@ describe('llmProviderTemplates', () => {
     expect(LLM_PROVIDER_TEMPLATE_BY_ID.modelflare).toMatchObject({
       protocol: 'openai',
       baseUrl: 'https://modelflare.dev/v1',
-      placeholderModels: 'gpt-6.1-sol',
+      placeholderModels: 'gpt-6.1-sol,gpt-6-sol,gpt-6-astra,claude-sonnet-5,claude-opus-5-5,gemini-3.1-pro-preview,grok-4.7',
       capabilities: ['openai-compatible', 'aggregator', 'model-discovery'],
       officialSources: [
         { label: 'Modelflare 专属注册', url: 'https://modelflare.dev/sign-up?utm_source=daily_stock_analysis&utm_campaign=app' },

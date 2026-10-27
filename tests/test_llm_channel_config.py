@@ -22,6 +22,7 @@ from src.config import (
     get_effective_agent_primary_model,
     get_fixed_litellm_temperature,
     normalize_litellm_temperature,
+    resolve_llm_channel_api_keys,
     resolve_llm_channel_names,
 )
 from src.llm.backend_registry import GENERATION_ONLY_BACKEND_IDS
@@ -107,7 +108,7 @@ class LLMChannelConfigTestCase(unittest.TestCase):
     @patch("src.config.setup_env")
     @patch.object(Config, "_parse_litellm_yaml", return_value=[])
     def test_modelflare_one_key_uses_shared_channel_without_persisting(self, _yaml, _setup) -> None:
-        for field in ("MODELFLARE_KEY", "LLM_MODELFLARE_API_KEY", "LLM_MODELFLARE_API_KEYS"):
+        for field in ("MODELFLARE_API_KEY", "MODELFLARE_KEY", "LLM_MODELFLARE_API_KEY", "LLM_MODELFLARE_API_KEYS"):
             env = {field: "sk-test"}
             with self.subTest(field=field), patch.dict(os.environ, env, clear=True):
                 config = Config._load_from_env()
@@ -116,6 +117,37 @@ class LLMChannelConfigTestCase(unittest.TestCase):
             self.assertEqual(config.litellm_model, "openai/gpt-6.1-sol")
             self.assertEqual(config.llm_model_list[0]["litellm_params"]["api_base"], "https://modelflare.dev/v1")
             self.assertEqual(config.llm_model_list[0]["litellm_params"]["api_key"], "sk-test")
+
+    def test_modelflare_api_key_resolves_names_and_keys(self) -> None:
+        self.assertEqual(resolve_llm_channel_names({"MODELFLARE_API_KEY": "sk-new"}), "modelflare")
+        self.assertEqual(resolve_llm_channel_names({"MODELFLARE_API_KEY": "  "}), "")
+        self.assertEqual(
+            resolve_llm_channel_names({"MODELFLARE_API_KEY": "sk-new", "LLM_CHANNELS": "other"}),
+            "other",
+        )
+        self.assertEqual(
+            resolve_llm_channel_api_keys("modelflare", [], {"MODELFLARE_API_KEY": "sk-new"}),
+            ["sk-new"],
+        )
+        self.assertEqual(
+            resolve_llm_channel_api_keys("modelflare", [], {
+                "MODELFLARE_API_KEY": "sk-new",
+                "MODELFLARE_KEY": "sk-legacy",
+            }),
+            ["sk-new"],
+        )
+        self.assertEqual(
+            resolve_llm_channel_api_keys("modelflare", [], {"MODELFLARE_KEY": "sk-legacy"}),
+            ["sk-legacy"],
+        )
+        self.assertEqual(
+            resolve_llm_channel_api_keys("modelflare", ["sk-explicit"], {"MODELFLARE_API_KEY": "sk-new"}),
+            ["sk-explicit"],
+        )
+        self.assertEqual(
+            resolve_llm_channel_api_keys("other", [], {"MODELFLARE_API_KEY": "sk-new"}),
+            [],
+        )
 
     def test_modelflare_one_key_does_not_append_to_explicit_channels_or_accept_blank_keys(self) -> None:
         self.assertEqual(resolve_llm_channel_names({"MODELFLARE_KEY": " ,  "}), "")
