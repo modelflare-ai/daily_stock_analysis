@@ -1,5 +1,5 @@
 const KEY_URL = 'https://modelflare.dev/keys';
-const DASHBOARD_URL = 'https://modelflare.dev/dashboard';
+const WALLET_URL = 'https://modelflare.dev/wallet';
 
 const BALANCE_RE = /quota|balance|insufficient|额度|余额/i;
 const GROUP_RE = /model_not_found|分组/;
@@ -50,8 +50,8 @@ export function modelflareConnectionMessage(input: {
     ? `Your Modelflare API key is invalid or revoked. Get a key at ${KEY_URL}`
     : `Modelflare API Key 无效或已停用。请到 ${KEY_URL} 复制新的 Key。`;
   const balanceCopy = en
-    ? `Insufficient Modelflare balance. Top up at ${DASHBOARD_URL}`
-    : `Modelflare 余额不足，请充值：${DASHBOARD_URL}`;
+    ? `Insufficient Modelflare balance. Top up at ${WALLET_URL}`
+    : `Modelflare 余额不足，请充值：${WALLET_URL}`;
   const groupCopy = en
     ? `This Modelflare key's group cannot call model ${model}. Change the group at ${KEY_URL} or pick another model.`
     : `当前 Key 的分组无法调用模型 ${model}，请在 ${KEY_URL} 调整分组，或换一个模型。`;

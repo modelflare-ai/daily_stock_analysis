@@ -5,8 +5,8 @@ from src.llm.modelflare_errors import friendly_modelflare_error, rewrite_modelfl
 
 ZH_KEY = "Modelflare API Key 无效或已停用。请到 https://modelflare.dev/keys 复制新的 Key。"
 EN_KEY = "Your Modelflare API key is invalid or revoked. Get a key at https://modelflare.dev/keys"
-ZH_BALANCE = "Modelflare 余额不足，请充值：https://modelflare.dev/dashboard"
-EN_BALANCE = "Insufficient Modelflare balance. Top up at https://modelflare.dev/dashboard"
+ZH_BALANCE = "Modelflare 余额不足，请充值：https://modelflare.dev/wallet"
+EN_BALANCE = "Insufficient Modelflare balance. Top up at https://modelflare.dev/wallet"
 BASE = "https://modelflare.dev/v1"
 MODEL = "gpt-6.1-sol"
 

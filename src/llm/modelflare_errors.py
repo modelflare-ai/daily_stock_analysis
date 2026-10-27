@@ -8,13 +8,13 @@ from typing import Any, Optional
 from urllib.parse import urlparse
 
 KEY_URL = "https://modelflare.dev/keys"
-DASHBOARD_URL = "https://modelflare.dev/dashboard"
+WALLET_URL = "https://modelflare.dev/wallet"
 DEFAULT_MODEL = "gpt-6.1-sol"
 
 _ZH_KEY = f"Modelflare API Key 无效或已停用。请到 {KEY_URL} 复制新的 Key。"
 _EN_KEY = f"Your Modelflare API key is invalid or revoked. Get a key at {KEY_URL}"
-_ZH_BALANCE = f"Modelflare 余额不足，请充值：{DASHBOARD_URL}"
-_EN_BALANCE = f"Insufficient Modelflare balance. Top up at {DASHBOARD_URL}"
+_ZH_BALANCE = f"Modelflare 余额不足，请充值：{WALLET_URL}"
+_EN_BALANCE = f"Insufficient Modelflare balance. Top up at {WALLET_URL}"
 
 _KNOWN_PREFIXES = (
     "Modelflare API Key 无效或已停用。",
